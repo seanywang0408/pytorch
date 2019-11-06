@@ -25,7 +25,7 @@ qactivation_configs = op_bench.cross_product_configs(
     permute_dims=(False, True),
     inplace=(False, True),
     dtype=(torch.quint8, torch.qint8, torch.qint32),
-    tags=('short',)
+    tags=('long',)
 )
 
 
@@ -73,7 +73,16 @@ class QReLUBenchmark(_ActivationBenchmarkBase):
         self.set_module_name("QReLU")
 
 
+class QReLU6Benchmark(_ActivationBenchmarkBase):
+    def init(self, dims, permute_dims, inplace, dtype):
+        super(QReLU6Benchmark, self).setup(dims, permute_dims, dtype)
+        # TODO(z-a-f): Enable `inplace` after #29245
+        self.qop = nnq.ReLU6(inplace=False)
+        self.set_module_name("QReLU6")
+
+
 op_bench.generate_pt_test(qactivation_configs, QReLUBenchmark)
+op_bench.generate_pt_test(qactivation_configs, QReLU6Benchmark)
 
 
 if __name__ == "__main__":
