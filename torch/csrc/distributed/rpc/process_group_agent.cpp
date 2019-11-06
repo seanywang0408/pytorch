@@ -300,6 +300,7 @@ void ProcessGroupAgent::enqueueSend(SendWork work) {
   // NB: this can be changed to use a native move capture when moved to C++14
   threadPool_.run(std::bind(
       [&](const SendWork& work) {
+        auto id = work.message_.id();
         std::string serializedPayload = serialize(work.message_);
 
         std::vector<torch::Tensor> preamble = {torch::tensor(
@@ -400,7 +401,6 @@ void ProcessGroupAgent::listenLoop() {
 
     std::vector<torch::Tensor> tensors = {torch::empty({size}, {torch::kChar})};
     pg_->recv(tensors, srcRank, pg_->getRank())->wait();
-
     enqueueRecv(RecvWork(allWorkerInfo_[srcRank], type, std::move(tensors[0])));
   }
 }
